@@ -1,13 +1,13 @@
 # Импорты
 from utils import Warehouse, Product, Food, Equipment
 
+
 def main():
     warehouses = []
     current_warehouse = None
-    foodpr = []
-    eqipr = []
+    products = {}
     while True:
-        request = input('Что вы хотите сделать?')
+        request = int(input('Что вы хотите сделать?'))
         '''
         1 - Создать новый склад
         2 - Выбрать склад, с которым человек будет работать по его имени
@@ -18,33 +18,28 @@ def main():
         '''
         match request:
             case 1:
-                current_warehouse = Warehouse(input(),[input().split(',')])
+                current_warehouse = Warehouse(input(), [input().split(',')])
                 warehouses.append(current_warehouse.name)
             case 2:
-                current_warehouse = warehouses[int(input())]
+                current_warehouse = warehouses[warehouses.index(input())]
             case 3:
                 product = input('Кого хотите добавить, непродовольственный или продукт?')
-                name = input()
+                name_of_pr = input()
                 price = float(input())
                 amount = float(input())
                 if product == "прод":
                     srok = int(input())
-                    foodpr.append(Food(Product(name, price, amount), srok))
+                    new_prod = Food(Product(name_of_pr, price, amount), srok)
                 else:
                     garant = int(input())
-                    eqipr.append(Equipment(Product(name, price, amount), garant))
-            case 4:
-                if product == "прод":
-                    foodpr.remove(input("Введите название продукта"))
-                else:
-                    eqipr.remove(input("Введите название предмета"))
-            case 5:
-                # if product == "прод":
-                #     otsort = sorted(foodpr, lambda x: Product.price)
-                # else:
-                #     otsort = sorted()
+                    new_prod = Equipment(Product(name_of_pr, price, amount), garant)
+                products[name_of_pr] = amount
                 
-                print(foodpr)
+            # case 4:
+            # case 5:
+                
+                
+                
         '''
         if request == '3':
             product = input('Кого хотите добавить, непродовольственный или продукт?')
