@@ -15,8 +15,12 @@ class Warehouse:
     #         else:
     #             return False       
 
-    def __getitem__(self, other):
-        if isinstance(other,) 
+    def __getitem__(self, item):
+        if item in self.list_of_prod:
+            return self.list_of_prod[item]
+        else:
+            return f'{item} нет в спсике'
+
 
 class Product:
     def __init__(self, name, price, quant): #def __init__(self, name, price, unit_of_wei, quant):
