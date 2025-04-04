@@ -1,5 +1,5 @@
 # Импорты
-from utils import Warehouse, Product, Food, Equipment
+from utils import Warehouse, Food, Equipment
 
 
 def main():
@@ -7,6 +7,8 @@ def main():
     current_warehouse = None
     products = {}
     while True:
+        if current_warehouse:
+            print(current_warehouse)
         request = int(input('Что вы хотите сделать?'))
         '''
         1 - Создать новый склад
@@ -18,28 +20,35 @@ def main():
         '''
         match request:
             case 1:
-                current_warehouse = Warehouse(input(), [input().split(',')])
+                current_warehouse = Warehouse(input("Введите название склада:"), [])
                 warehouses.append(current_warehouse.name)
             case 2:
+                print(f"Список складов: \n{warehouses}")
                 current_warehouse = warehouses[warehouses.index(input())]
+                print(f"Текущий склад: {current_warehouse}")
             case 3:
                 product = input('Кого хотите добавить, непродовольственный или продукт?')
-                name_of_pr = input()
-                price = float(input())
-                amount = float(input())
+                name_of_pr = input("Название продукта: ")
+                price = float(input("Какая цена?: "))
+                amount = float(input("В каком количестве?: "))
                 if product == "прод":
-                    srok = int(input())
-                    new_prod = Food(Product(name_of_pr, price, amount), srok)
+                    srok = int(input("Какой срок годности?"))
+                    new_prod = Food(srok, name_of_pr, amount, price)
                 else:
-                    garant = int(input())
-                    new_prod = Equipment(Product(name_of_pr, price, amount), garant)
-                products[name_of_pr] = amount
-                
-            # case 4:
-            # case 5:
-                
-                
-                
+                    garant = int(input("Какой срок гарантии?"))
+                    new_prod = Equipment(garant, name_of_pr, amount, price)
+                current_warehouse += new_prod
+                # print(new_prod)
+                # print(repr(new_prod))
+            case 4:
+                buy = input("Что вы хотите купить?")
+                n = int(input("В каком количестве?"))
+                current_warehouse.buy_prod(buy, n)
+            case 5:  
+                print(current_warehouse.sortirovka())
+            case 6:
+                current_warehouse.check()
+
         '''
         if request == '3':
             product = input('Кого хотите добавить, непродовольственный или продукт?')
