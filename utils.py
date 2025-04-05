@@ -1,8 +1,15 @@
-class Warehouse:
-    def __init__(self, name, initial_data):
-        self.name = name
-        self.list_of_prod = initial_data   
+from dataclasses import dataclass
 
+
+class Warehouse:
+
+    def __init__(self, name, initial_data):                                     
+        self.name = name
+        self.list_of_prod = initial_data  
+
+    # def __iadd__(self, warehouses, current_warehouse):
+    #     warehouses.append(current_warehouse.name)
+     
     def __getitem__(self, index):
         return self.list_of_prod[index]
     
@@ -26,7 +33,7 @@ class Warehouse:
                     i -= quant
                 except:
                     print("Товвара меньше, чем вы хотите купить")
-    
+
     def sortirovka(self):
         return sorted(self.list_of_prod)
     
@@ -42,8 +49,23 @@ class Warehouse:
             # ans = input()
             # if ans == '':
 
+
+# class current_warehouse(Warehouse):
+
+#     def __init__(self, cur_wareh, name):
+#         super().__init__(name)
+#         self.current_warehouse = cur_wareh
     
-    
+#     def asingment_wareh(self):
+#         self.current_warehouse = Warehouse(input("Введите название склада:"), [])
+#         return self.current_warehouse
+
+# @dataclass
+# class warehouses:
+#     name_of_wareh : current_warehouse.name
+
+#     def __iadd__(self, other_wareh):
+#         self.name_of_wareh.append(other_wareh.name)
 
 
 class Product:
@@ -52,7 +74,7 @@ class Product:
         self.price = price
         self.quant = quant
 
-    def __iadd__(self,quant): 
+    def __iadd__(self, quant): 
         self.quant += quant
         return self
 
@@ -69,11 +91,6 @@ class Product:
     def __repr__(self):
         return f'{self.name} ({self.quant})'
 
-    
-
-    
-    
-    
     # def __repr__(self):
     #    return f'Product("{self.name}", {self.quant}, {self.price})'
     

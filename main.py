@@ -5,7 +5,8 @@ from utils import Warehouse, Food, Equipment
 def main():
     warehouses = []
     current_warehouse = None
-    products = {}
+    # current_warehouse.asingment_wareh()
+    # warehouses.name_of_wareh.append(current_warehouse.name)
     while True:
         if current_warehouse:
             print(current_warehouse)
@@ -22,6 +23,9 @@ def main():
             case 1:
                 current_warehouse = Warehouse(input("Введите название склада:"), [])
                 warehouses.append(current_warehouse.name)
+                # Warehouse.data([])
+                
+
             case 2:
                 print(f"Список складов: \n{warehouses}")
                 current_warehouse = warehouses[warehouses.index(input())]
