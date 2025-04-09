@@ -1,5 +1,47 @@
-from dataclasses import dataclass
+warehouses = []
+current_warehouse = None
 
+def case1():
+    global current_warehouse, warehouses
+    name = input('Введите название склада: ')
+    initial_data = []
+    current_warehouse = Warehouse(name, initial_data)
+    warehouses.append(current_warehouse.name)
+    
+
+def case2():
+    global current_warehouse, warehouses
+    print(f"Список складов: \n{warehouses}")
+    current_warehouse = warehouses[warehouses.index(input())]
+    print(f"Текущий склад: {current_warehouse}")
+    
+
+def case3():
+    global current_warehouse
+    product = input('Кого хотите добавить, непродовольственный или продукт? ')
+    name_of_pr = input("Название продукта: ")
+    price = float(input("Какая цена?: "))
+    amount = float(input("В каком количестве? "))
+    if product == "прод":
+        srok = int(input("Какой срок годности? "))
+        new_prod = Food(srok, name_of_pr, amount, price)
+    else:
+        garant = int(input("Какой срок гарантии? "))
+        new_prod = Equipment(garant, name_of_pr, amount, price)
+    current_warehouse += new_prod
+
+
+def case4():
+    global current_warehouse
+    buy = input("Что вы хотите купить? ")
+    n = int(input("В каком количестве? "))
+    current_warehouse.buy_prod(buy, n)
+
+def case5():
+    print(current_warehouse.sortirovka())
+
+def case6():
+    current_warehouse.check()
 
 class Warehouse:
 
@@ -9,7 +51,7 @@ class Warehouse:
 
     # def __iadd__(self, warehouses, current_warehouse):
     #     warehouses.append(current_warehouse.name)
-     
+
     def __getitem__(self, index):
         return self.list_of_prod[index]
     
@@ -46,26 +88,6 @@ class Warehouse:
             print("Такой товар имеется в наличии")
         else:
             print("Такого товар нет, хотите заказать?") 
-            # ans = input()
-            # if ans == '':
-
-
-# class current_warehouse(Warehouse):
-
-#     def __init__(self, cur_wareh, name):
-#         super().__init__(name)
-#         self.current_warehouse = cur_wareh
-    
-#     def asingment_wareh(self):
-#         self.current_warehouse = Warehouse(input("Введите название склада:"), [])
-#         return self.current_warehouse
-
-# @dataclass
-# class warehouses:
-#     name_of_wareh : current_warehouse.name
-
-#     def __iadd__(self, other_wareh):
-#         self.name_of_wareh.append(other_wareh.name)
 
 
 class Product:
@@ -85,7 +107,7 @@ class Product:
             self.quant -= quant
             return self
 
-    def __lt__(self,other):
+    def __lt__(self, other):
         return self.price < other.price
     
     def __repr__(self):
@@ -94,10 +116,12 @@ class Product:
     # def __repr__(self):
     #    return f'Product("{self.name}", {self.quant}, {self.price})'
     
+
 class Food(Product):
     def __init__(self, exp_date, name, quant, price=0):
         super().__init__(name, quant, price)
         self.exp_date = exp_date
+
 
 class Equipment(Product):
     def __init__(self, war, name, quant, price=0):
