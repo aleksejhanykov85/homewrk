@@ -1,19 +1,53 @@
-warehouses = []
+# warehouses = []
 current_warehouse = None
+dict_warehouses = {}
+
+
+def info():
+    print('''
+        1 - Создать новый склад
+        2 - Выбрать склад, с которым человек будет работать по его имени
+        3 - Добавить товар на склад
+        4 - Выкупить товар со склада
+        5 - Посмотреть товары на складе отсортированные по общей стоимости
+        6 - Проверить наличие товара на складе по его названию
+        ''')
+    if current_warehouse:
+        print(current_warehouse)
+    request = int(input('Что вы хотите сделать? '))
+    match request:
+        case 1:
+            case1()
+        case 2:
+            case2()
+        case 3:
+            case3()
+        case 4:
+            case4()
+        case 5:  
+            case5()
+        case 6:
+            case6()
+
 
 def case1():
-    global current_warehouse, warehouses
+    global current_warehouse, dict_warehouses
     name = input('Введите название склада: ')
     initial_data = []
     current_warehouse = Warehouse(name, initial_data)
-    warehouses.append(current_warehouse.name)
+    # warehouses.append(current_warehouse)
+    dict_warehouses[current_warehouse.name] = initial_data
     
 
 def case2():
-    global current_warehouse, warehouses
-    print(f"Список складов: \n{warehouses}")
-    current_warehouse = warehouses[warehouses.index(input())]
-    print(f"Текущий склад: {current_warehouse}")
+    global current_warehouse
+    print(f"Список складов: \n{dict_warehouses}")
+    key = input("Введите название склада: ")
+    current_warehouse = Warehouse(key, dict_warehouses[key])
+    print(f"Текущий склад: {current_warehouse.name}")
+    # for i in warehouses:
+    #     print(i.name)
+    # print(dict_warehouses)
     
 
 def case3():
@@ -37,11 +71,14 @@ def case4():
     n = int(input("В каком количестве? "))
     current_warehouse.buy_prod(buy, n)
 
+
 def case5():
     print(current_warehouse.sortirovka())
 
+
 def case6():
     current_warehouse.check()
+
 
 class Warehouse:
 
@@ -83,7 +120,7 @@ class Warehouse:
         return item in self.list_of_prod
 
     def check(self):
-        item = input("Введите товар на проверку наличия: ")
+        item = input("Введите товар на проверку наличия:")
         if item in self.list_of_prod:
             print("Такой товар имеется в наличии")
         else:
