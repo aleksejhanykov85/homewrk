@@ -1,6 +1,33 @@
 # warehouses = []
+def check_of_warh(func):
+    def wrapper():
+        if current_warehouse is None:
+            print("Склад еще не создан!")
+            answer = input("Хотите создать или поменять склад? ")
+            if answer == "создать":
+                case1()
+                return
+            elif answer == 'поменять':
+                case2()
+                return
+            else:
+                return
+        elif current_warehouse.list_of_prod == []:
+            print("Этот склад еще пуст! Сначала завезите товар ")
+            answer = input("Хотите завезти? ")
+            if answer == "да" or answer == "yes": 
+                case3()
+                return
+            else:
+                return
+        else:
+            func()
+    return wrapper
+
+
+
 current_warehouse = None
-dict_warehouses = {}
+warehouses = []
 
 
 def info():
@@ -31,23 +58,24 @@ def info():
 
 
 def case1():
-    global current_warehouse, dict_warehouses
+    global current_warehouse, warehouses
     name = input('Введите название склада: ')
     initial_data = []
     current_warehouse = Warehouse(name, initial_data)
-    # warehouses.append(current_warehouse)
-    dict_warehouses[current_warehouse.name] = initial_data
+    warehouses.append(current_warehouse)
+
     
 
 def case2():
     global current_warehouse
-    print(f"Список складов: \n{dict_warehouses}")
+    print(f"Список складов: ")
+    print(*warehouses, sep='\n')
     key = input("Введите название склада: ")
-    current_warehouse = Warehouse(key, dict_warehouses[key])
-    print(f"Текущий склад: {current_warehouse.name}")
-    # for i in warehouses:
-    #     print(i.name)
-    # print(dict_warehouses)
+    for i in warehouses:
+        if i.name == key:
+            current_warehouse = i
+            print(f"Текущий склад: {current_warehouse.name}")
+    
     
 
 def case3():
@@ -65,17 +93,35 @@ def case3():
     current_warehouse += new_prod
 
 
+@check_of_warh
 def case4():
     global current_warehouse
+    # if current_warehouse is None:
+    #     print("Склад еще не создан!")
+    #     answer = input("Хотите создать или поменять склад? ")
+    #     if answer == "создать":
+    #         case1()
+    #     elif answer == 'поменять':
+    #         case2()
+    #     else:
+    #         return
+    # if current_warehouse is not None and dict_warehouses[current_warehouse.name] == '':
+    #     print("Этот склад еще пуст! Сначала завезите товар")
+    #     answer = input("Хотите завезти?")
+    #     if answer == "yes" or "да":
+    #         case3()
+    #     else:
+    #         return
+    # else:
     buy = input("Что вы хотите купить? ")
     n = int(input("В каком количестве? "))
     current_warehouse.buy_prod(buy, n)
 
-
+@check_of_warh
 def case5():
     print(current_warehouse.sortirovka())
 
-
+@check_of_warh
 def case6():
     current_warehouse.check()
 
@@ -100,7 +146,7 @@ class Warehouse:
         return self
 
     def __str__(self):
-        return f'Название: {self.name} \nСписок товаров({self.list_of_prod})'
+        return f'Название: {self.name}, Список товаров({self.list_of_prod})'
     
     def __contains__(self, item):
         return item in self.list_of_prod
@@ -164,3 +210,5 @@ class Equipment(Product):
     def __init__(self, war, name, quant, price=0):
         super().__init__(name, quant, price)
         self.war = war
+
+
