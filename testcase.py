@@ -1,9 +1,9 @@
-from utils import info
+from utils import main_menu
 
 
 def main():
     while True:
-        info()
+        main_menu()
         
          
 if __name__ == '__main__':
