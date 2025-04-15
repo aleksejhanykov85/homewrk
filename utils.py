@@ -1,5 +1,5 @@
 import sys
-
+from abc import ABC, abstractmethod
 
 def get_float_value(mes):
     try:
@@ -7,7 +7,7 @@ def get_float_value(mes):
         return value
     except ValueError:
         print('Неверное значение! Значение должно быть в формате числа')
-        return get_float_value()
+        return get_float_value(mes)
 
 
 def check_product_name():
@@ -76,7 +76,7 @@ def check_of_warh(func):
 
 current_warehouse = None
 warehouses = []
-answer = ''
+
 
 
 
@@ -119,8 +119,8 @@ def case1():
     
 
 def case2():
-    global current_warehouse, answer
-
+    global current_warehouse
+    answer = ''
     print(f"Список складов: ")
     if warehouses == []:
         print("Список складов пустой")
@@ -157,7 +157,8 @@ def case2():
 
 
 def case3():
-    global current_warehouse, answer
+    global current_warehouse
+    answer = ''
     if current_warehouse is None:
         print("Склад еще не создан! ")
         while answer != "создать" or "выйти":
@@ -243,7 +244,7 @@ class Warehouse:
             print("Такого товар нет, хотите заказать?") 
 
 
-class Product:
+class Product():
     def __init__(self, name, quant, price=0):
         self.name = name
         self.price = price
@@ -265,9 +266,6 @@ class Product:
     
     def __repr__(self):
         return f'{self.name} ({self.quant})'
-
-    # def __repr__(self):
-    #    return f'Product("{self.name}", {self.quant}, {self.price})'
     
 
 class Food(Product):
