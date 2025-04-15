@@ -1,40 +1,13 @@
 import sys
 
 
-def check_product_price():
-    global price
+def get_float_value(mes):
     try:
-        price = float(input("Какая цена?: "))
+        value = float(input(mes))
+        return value
     except ValueError:
-        print('Неверное значение! Цена должна быть в формате числа')
-        check_product_price()
-
-
-def check_product_amount():
-    global amount
-    try:
-        amount = float(input("В каком количестве? "))
-    except ValueError:
-        print('Неверное значение! Количество должно быть в формате числа')
-        check_product_amount()
-
-
-def check_product_srok():
-    global srok
-    try:
-        srok = float(input("Какой срок годности? "))
-    except ValueError:
-        print('Неверное значение! Срок должен быть в формате числа')
-        check_product_srok()
-
-
-def check_product_garant():
-    global garant
-    try:
-        garant = float(input("Какой срок гарантии? "))
-    except ValueError:
-        print('Неверное значение! Гарантия должна быть в формате числа')
-        check_product_garant()
+        print('Неверное значение! Значение должно быть в формате числа')
+        return get_float_value()
 
 
 def check_product_name():
@@ -49,31 +22,30 @@ def check_of_product():
     product = input('Какой товар хотите добавить, непрод или прод? ').lower()
     if product == "прод" or product == "непрод":
         check_product_name()
-        check_product_price()
-        check_product_amount()
-        global new_prod
+        price = get_float_value("Введите цену: ")
+        amount = get_float_value("Введите количество: ")
+        
         if product == "прод":
-            check_product_srok()
+            srok = get_float_value("Введите срок годности: ")
             new_prod = Food(srok, name_of_pr, amount, price)
         elif product == "непрод":
-            check_product_garant()
+            garant = get_float_value("Введите гарантию: ")
             new_prod = Equipment(garant, name_of_pr, amount, price)
+        return new_prod
     else:
         print("Нужно выбрать 'прод' или 'непрод'")
-        check_of_product()
-        return
-
+        return check_of_product()
+        
 
 def check_request():
-    global request
     try:
         request = int(input('Что вы хотите сделать? '))
         if request <= 0 or request > 7:
-            print('Неверное значение! Нужно вводить цифры из списка')
-            check_request()
+            raise ValueError
+        return request
     except ValueError:
         print('Неверное значение! Нужно вводить цифры из списка')
-        check_request()
+        return check_request()
 
 
 def check_of_warh(func):
@@ -104,12 +76,8 @@ def check_of_warh(func):
 
 current_warehouse = None
 warehouses = []
-request = 0
 answer = ''
-price = 0
-garant = 0
-amount = 0
-srok = 0
+
 
 
 def main_menu():
@@ -124,7 +92,7 @@ def main_menu():
         ''')
     if current_warehouse:
         print(current_warehouse)
-    check_request()
+    request = check_request()
     match request:
         case 1:
             case1()
@@ -202,7 +170,7 @@ def case3():
             else:
                 print('Неправильный ввод, повторите')
     else:
-        check_of_product()
+        new_prod = check_of_product()
         current_warehouse += new_prod
 
 
