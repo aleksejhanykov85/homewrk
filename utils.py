@@ -1,5 +1,6 @@
 import sys
-from abc import ABC, abstractmethod
+# from abc import ABC, abstractmethod
+
 
 def get_float_value(mes):
     try:
@@ -10,18 +11,19 @@ def get_float_value(mes):
         return get_float_value(mes)
 
 
-def check_product_name():
-    global name_of_pr
+def get_product_name():
     name_of_pr = input("Название продукта: ")
-    if name_of_pr == '':
+    
+    if not name_of_pr.isalpha():
         print("Введите название продукта")
-        check_product_name()
+        get_product_name()
+    return name_of_pr
 
 
 def check_of_product():
     product = input('Какой товар хотите добавить, непрод или прод? ').lower()
     if product == "прод" or product == "непрод":
-        check_product_name()
+        name_of_pr = get_product_name()
         price = get_float_value("Введите цену: ")
         amount = get_float_value("Введите количество: ")
         
@@ -52,20 +54,25 @@ def check_of_warh(func):
     def wrapper():
         if current_warehouse is None:
             print("Склад еще не создан!")
-            answer = input("Хотите создать или поменять склад? ").lower()
-            if answer == "создать":
-                case1()
-                return
-            elif answer == 'поменять':
-                case2()
-                return
-            else:
-                return
-        elif current_warehouse.list_of_prod == []:
+            while True:
+                answer = input("Хотите создать склад или выйти?").lower()
+                if answer == "создать":
+                    create_new_warh()
+                    func()
+                    return
+                elif answer == "выйти":
+                    return
+        else:
+            func()
+    return wrapper
+
+def check_warh_prod_availability(func):
+    def wrapper():
+        if current_warehouse.list_of_prod == []:
             print("Этот склад еще пуст! Сначала завезите товар ")
             answer = input("Хотите завезти? ").lower()
             if answer == "да" or answer == "yes": 
-                case3()
+                new_product()
                 return
             else:
                 return
@@ -76,8 +83,6 @@ def check_of_warh(func):
 
 current_warehouse = None
 warehouses = []
-
-
 
 
 def main_menu():
@@ -95,88 +100,76 @@ def main_menu():
     request = check_request()
     match request:
         case 1:
-            case1()
+            create_new_warh()
         case 2:
-            case2()
+            switch_warh()
         case 3:
-            case3()
+            new_product()
         case 4:
-            case4()
+            buy_product()
         case 5:  
-            case5()
+            sorting()
         case 6:
-            case6()
+            check_availability()
         case 7:
-            case7()
+            exit_from_warh()
 
 
-def case1():
-    global current_warehouse, warehouses
+def create_new_warh():
+    global current_warehouse
     name = input('Введите название склада: ')
     initial_data = []
     current_warehouse = Warehouse(name, initial_data)
     warehouses.append(current_warehouse)
     
 
-def case2():
+def switch_warh():
     global current_warehouse
     answer = ''
     print(f"Список складов: ")
     if warehouses == []:
         print("Список складов пустой")
-        while answer != 'добавить' or answer != "выйти":
+        while True:
             answer = input("Хотите добавить склад или выйти? ").lower()
             if answer == 'добавить':
-                case1()
+                create_new_warh()
                 return
             elif answer == "выйти":
                 return
-        else:
-            print("Нет такого варианта")
+            else:
+                print("Нет такого варианта")
     else:
         print(*warehouses, sep='\n')
         key = input("Введите название склада: ")
-        for i in warehouses:
+        for i in  warehouses:
             if i.name == key:
                 current_warehouse = i
                 print(f"Текущий склад: {current_warehouse.name}")
-                return
-            else:
-                print("Такого склада нет в списке")
-                while answer != "выйти" or answer != "создать" or answer != "переключить":
-                    answer = input("Хотите создать/переключить/выйти? ").lower()
-                    if answer == "создать":
-                        case1()
-                    elif answer == "переключить":
-                        case2()
-                        return
-                    elif answer == "выйти":
-                        return
-                    else:
-                        print("Нет такого варианта")
-
-
-def case3():
-    global current_warehouse
-    answer = ''
-    if current_warehouse is None:
-        print("Склад еще не создан! ")
-        while answer != "создать" or "выйти":
-            answer = input("хотите создать или выйти? ").lower()
+                return  
+        print("Такого склада нет в списке")
+        while True:
+            answer = input("Хотите создать/переключить/выйти? ").lower()
             if answer == "создать":
-                case1()
+                create_new_warh()
+                return
+            elif answer == "переключить":
+                switch_warh()
                 return
             elif answer == "выйти":
                 return
             else:
-                print('Неправильный ввод, повторите')
-    else:
-        new_prod = check_of_product()
-        current_warehouse += new_prod
+                print("Нет такого варианта")
+
+@check_of_warh
+def new_product():
+    global current_warehouse
+    new_prod = check_of_product()
+    current_warehouse += new_prod
 
 
 @check_of_warh
-def case4():
+@check_warh_prod_availability
+def buy_product():
     global current_warehouse
     buy = input("Что вы хотите купить? ")
     n = int(input("В каком количестве? "))
@@ -184,16 +177,18 @@ def case4():
 
 
 @check_of_warh
-def case5():
+@check_warh_prod_availability
+def sorting():
     print(current_warehouse.sortirovka())
 
 
 @check_of_warh
-def case6():
+@check_warh_prod_availability
+def check_availability():
     current_warehouse.check()
 
 
-def case7():
+def exit_from_warh():
     sys.exit(0)
 
 
@@ -250,9 +245,10 @@ class Product():
         self.price = price
         self.quant = quant
 
-    def __iadd__(self, quant): 
-        self.quant += quant
-        return self
+    def __iadd__(self, other): 
+        if self.name == other.name:
+            self.quant += other.quant
+            return self.quant
 
     def __isub__(self, quant):
         if self.quant < quant:
@@ -278,3 +274,70 @@ class Equipment(Product):
     def __init__(self, war, name, quant, price=0):
         super().__init__(name, quant, price)
         self.war = war
+
+
+# class Product(ABC):
+#     def __init__(self, name, quant, price=0):
+#         self.name = name
+#         self.price = price
+#         self.quant = quant
+
+#     @abstractmethod
+#     def __iadd__(self, quant): 
+#         pass
+
+#     @abstractmethod
+#     def __isub__(self, quant):
+#         pass
+
+#     @abstractmethod
+#     def __lt__(self, other):
+#         pass
+    
+#     @abstractmethod
+#     def __repr__(self):
+#         pass
+    
+# class Food(Product):
+#     def __init__(self, exp_date, name, quant, price=0):
+#         super().__init__(name, quant, price)
+#         self.exp_date = exp_date
+
+#     def __iadd__(self, quant): 
+#         self.quant += quant
+#         return self
+
+#     def __isub__(self, quant):
+#         if self.quant < quant:
+#             raise ValueError("Недостаточно товара")
+#         else:
+#             self.quant -= quant
+#             return self
+
+#     def __lt__(self, other):
+#         return self.price < other.price
+    
+#     def __repr__(self):
+#         return f'{self.name} ({self.quant})'
+
+# class Equipment(Product):
+#     def __init__(self, war, name, quant, price=0):
+#         super().__init__(name, quant, price)
+#         self.war = war
+    
+#     def __iadd__(self, quant): 
+#         self.quant += quant
+#         return self
+
+#     def __isub__(self, quant):
+#         if self.quant < quant:
+#             raise ValueError("Недостаточно товара")
+#         else:
+#             self.quant -= quant
+#             return self
+
+#     def __lt__(self, other):
+#         return self.price < other.price
+    
+#     def __repr__(self):
+#         return f'{self.name} ({self.quant})'
