@@ -1,6 +1,6 @@
 import sys
 # from abc import ABC, abstractmethod
-
+from datetime import datetime as dt
 
 def get_float_value(mes):
     try:
@@ -9,12 +9,21 @@ def get_float_value(mes):
     except ValueError:
         print('Неверное значение! Значение должно быть в формате числа')
         return get_float_value(mes)
+    
 
+def get_strptime_value(mes):
+    try:
+        value = dt.strptime(input(mes), "%d.%m.%Y")
+        if value <= dt.now():
+            raise ValueError
+        return value
+    except ValueError:
+        print("Неверное значение! формат дд.мм.гг:")
+        return get_strptime_value(mes)
 
 def get_product_name():
     name_of_pr = input("Название продукта: ")
-    
-    if not name_of_pr.isalpha():
+    if not any(char.isalpha() for char in name_of_pr):
         print("Введите название продукта")
         get_product_name()
     return name_of_pr
@@ -26,9 +35,8 @@ def check_of_product():
         name_of_pr = get_product_name()
         price = get_float_value("Введите цену: ")
         amount = get_float_value("Введите количество: ")
-        
         if product == "прод":
-            srok = get_float_value("Введите срок годности: ")
+            srok = get_strptime_value("Введите срок годности в формате дд.мм.гг: ")
             new_prod = Food(srok, name_of_pr, amount, price)
         elif product == "непрод":
             garant = get_float_value("Введите гарантию: ")
@@ -42,7 +50,7 @@ def check_of_product():
 def check_request():
     try:
         request = int(input('Что вы хотите сделать? '))
-        if request <= 0 or request > 7:
+        if request <= 0 or request > 8:
             raise ValueError
         return request
     except ValueError:
@@ -55,7 +63,7 @@ def check_of_warh(func):
         if current_warehouse is None:
             print("Склад еще не создан!")
             while True:
-                answer = input("Хотите создать склад или выйти?").lower()
+                answer = input("Хотите создать склад или выйти? ").lower()
                 if answer == "создать":
                     create_new_warh()
                     func()
@@ -93,7 +101,8 @@ def main_menu():
         4 - Выкупить товар со склада
         5 - Посмотреть товары на складе отсортированные по общей стоимости
         6 - Проверить наличие товара на складе по его названию
-        7 - Выход из программы
+        7 - Проверить срок годности/гарантию товара
+        8 - Выход из программы
         ''')
     if current_warehouse:
         print(current_warehouse)
@@ -112,12 +121,17 @@ def main_menu():
         case 6:
             check_availability()
         case 7:
+            check_date()
+        case 8:
             exit_from_warh()
 
 
 def create_new_warh():
     global current_warehouse
     name = input('Введите название склада: ')
+    if not any(char.isalpha() for char in name):
+        create_new_warh()
+        return
     initial_data = []
     current_warehouse = Warehouse(name, initial_data)
     warehouses.append(current_warehouse)
@@ -164,6 +178,10 @@ def switch_warh():
 def new_product():
     global current_warehouse
     new_prod = check_of_product()
+    for i in current_warehouse.list_of_prod:
+        if new_prod.name == i.name:
+            i += new_prod
+            return
     current_warehouse += new_prod
 
 
@@ -192,14 +210,28 @@ def exit_from_warh():
     sys.exit(0)
 
 
+def check_date():
+        print(current_warehouse.list_of_prod)
+        item = input("Введите название продукта для проверки даты/гарантии ")
+        for i in current_warehouse.list_of_prod:
+            if i.name == item: 
+                if isinstance(i, Food):
+                    date = i.exp_date.date()
+                elif isinstance(i, Equipment):
+                    date = i.war.date()
+                current_datetime = dt.now().date()
+                print(item, date, current_datetime)
+                difr = date - current_datetime
+                print(f"осталось {difr.days} дней")
+                return
+        print("Такого товар нет, хотите заказать? ") 
+
+
 class Warehouse:
 
     def __init__(self, name, initial_data):                                     
         self.name = name
         self.list_of_prod = initial_data  
-
-    # def __iadd__(self, warehouses, current_warehouse):
-    #     warehouses.append(current_warehouse.name)
 
     def __getitem__(self, index):
         return self.list_of_prod[index]
@@ -213,10 +245,10 @@ class Warehouse:
 
     def __str__(self):
         return f'Название: {self.name}, Список товаров({self.list_of_prod})'
-    
+
     def __contains__(self, item):
         return item in self.list_of_prod
-    
+
     def buy_prod(self, name, quant):
         for i in self.list_of_prod:
             if i.name == name:
@@ -245,11 +277,6 @@ class Product():
         self.price = price
         self.quant = quant
 
-    def __iadd__(self, other): 
-        if self.name == other.name:
-            self.quant += other.quant
-            return self.quant
-
     def __isub__(self, quant):
         if self.quant < quant:
             raise ValueError("Недостаточно товара")
@@ -261,7 +288,8 @@ class Product():
         return self.price < other.price
     
     def __repr__(self):
-        return f'{self.name} ({self.quant})'
+        return f'{self.name} ({self.quant}) ({self.price})'
+    
     
 
 class Food(Product):
@@ -269,12 +297,20 @@ class Food(Product):
         super().__init__(name, quant, price)
         self.exp_date = exp_date
 
+    def __iadd__(self, other): 
+        if self.name == other.name and self.price == other.price and self.exp_date == other.exp_date:
+            self.quant += other.quant
+            return self.quant
 
 class Equipment(Product):
     def __init__(self, war, name, quant, price=0):
         super().__init__(name, quant, price)
         self.war = war
 
+    def __iadd__(self, other): 
+        if self.name == other.name and self.price == other.price and self.war == other.war:
+            self.quant += other.quant
+            return self.quant
 
 # class Product(ABC):
 #     def __init__(self, name, quant, price=0):
