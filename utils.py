@@ -1,5 +1,4 @@
 import sys
-# from abc import ABC, abstractmethod
 from datetime import datetime as dt
 
 def get_float_value(mes):
@@ -21,25 +20,24 @@ def get_strptime_value(mes):
         print("Неверное значение! формат дд.мм.гг:")
         return get_strptime_value(mes)
 
-def get_product_name():
-    name_of_pr = input("Название продукта: ")
+def get_product_name(mes):
+    name_of_pr = input(mes)
     if not any(char.isalpha() for char in name_of_pr):
-        print("Введите название продукта")
-        get_product_name()
+        get_product_name(mes)
     return name_of_pr
 
 
 def check_of_product():
     product = input('Какой товар хотите добавить, непрод или прод? ').lower()
     if product == "прод" or product == "непрод":
-        name_of_pr = get_product_name()
+        name_of_pr = get_product_name("Название продукта: ")
         price = get_float_value("Введите цену: ")
         amount = get_float_value("Введите количество: ")
         if product == "прод":
             srok = get_strptime_value("Введите срок годности в формате дд.мм.гг: ")
             new_prod = Food(srok, name_of_pr, amount, price)
         elif product == "непрод":
-            garant = get_float_value("Введите гарантию: ")
+            garant = get_strptime_value("Введите срок гарантии в формате дд.мм.гг: ")
             new_prod = Equipment(garant, name_of_pr, amount, price)
         return new_prod
     else:
@@ -78,12 +76,12 @@ def check_warh_prod_availability(func):
     def wrapper():
         if current_warehouse.list_of_prod == []:
             print("Этот склад еще пуст! Сначала завезите товар ")
-            answer = input("Хотите завезти? ").lower()
-            if answer == "да" or answer == "yes": 
-                new_product()
-                return
-            else:
-                return
+            while True:
+                answer = input("Хотите завезти? ").lower()
+                if answer == "да" or answer == "yes": 
+                    new_product()
+                    func()
+                    return
         else:
             func()
     return wrapper
@@ -179,7 +177,7 @@ def new_product():
     global current_warehouse
     new_prod = check_of_product()
     for i in current_warehouse.list_of_prod:
-        if new_prod.name == i.name:
+        if type(new_prod) == type(i) and new_prod == i:
             i += new_prod
             return
     current_warehouse += new_prod
@@ -209,9 +207,11 @@ def check_availability():
 def exit_from_warh():
     sys.exit(0)
 
-
+@check_of_warh
+@check_warh_prod_availability
 def check_date():
-        print(current_warehouse.list_of_prod)
+    print(current_warehouse.list_of_prod)
+    while True:
         item = input("Введите название продукта для проверки даты/гарантии ")
         for i in current_warehouse.list_of_prod:
             if i.name == item: 
@@ -224,8 +224,14 @@ def check_date():
                 difr = date - current_datetime
                 print(f"осталось {difr.days} дней")
                 return
-        print("Такого товар нет, хотите заказать? ") 
-
+        answer = ("Такого товар нет, хотите заказать или выйти?") 
+        if answer == "заказать":
+            new_product()
+            check_date()
+            return
+        elif answer == "выйти":
+            return
+    
 
 class Warehouse:
 
@@ -290,7 +296,6 @@ class Product():
     def __repr__(self):
         return f'{self.name} ({self.quant}) ({self.price})'
     
-    
 
 class Food(Product):
     def __init__(self, exp_date, name, quant, price=0):
@@ -300,7 +305,11 @@ class Food(Product):
     def __iadd__(self, other): 
         if self.name == other.name and self.price == other.price and self.exp_date == other.exp_date:
             self.quant += other.quant
-            return self.quant
+            return self
+        
+    def __eq__(self,other):
+        return self.name == other.name and self.price == other.price and self.exp_date == other.exp_date
+        
 
 class Equipment(Product):
     def __init__(self, war, name, quant, price=0):
@@ -310,70 +319,7 @@ class Equipment(Product):
     def __iadd__(self, other): 
         if self.name == other.name and self.price == other.price and self.war == other.war:
             self.quant += other.quant
-            return self.quant
-
-# class Product(ABC):
-#     def __init__(self, name, quant, price=0):
-#         self.name = name
-#         self.price = price
-#         self.quant = quant
-
-#     @abstractmethod
-#     def __iadd__(self, quant): 
-#         pass
-
-#     @abstractmethod
-#     def __isub__(self, quant):
-#         pass
-
-#     @abstractmethod
-#     def __lt__(self, other):
-#         pass
-    
-#     @abstractmethod
-#     def __repr__(self):
-#         pass
-    
-# class Food(Product):
-#     def __init__(self, exp_date, name, quant, price=0):
-#         super().__init__(name, quant, price)
-#         self.exp_date = exp_date
-
-#     def __iadd__(self, quant): 
-#         self.quant += quant
-#         return self
-
-#     def __isub__(self, quant):
-#         if self.quant < quant:
-#             raise ValueError("Недостаточно товара")
-#         else:
-#             self.quant -= quant
-#             return self
-
-#     def __lt__(self, other):
-#         return self.price < other.price
-    
-#     def __repr__(self):
-#         return f'{self.name} ({self.quant})'
-
-# class Equipment(Product):
-#     def __init__(self, war, name, quant, price=0):
-#         super().__init__(name, quant, price)
-#         self.war = war
-    
-#     def __iadd__(self, quant): 
-#         self.quant += quant
-#         return self
-
-#     def __isub__(self, quant):
-#         if self.quant < quant:
-#             raise ValueError("Недостаточно товара")
-#         else:
-#             self.quant -= quant
-#             return self
-
-#     def __lt__(self, other):
-#         return self.price < other.price
-    
-#     def __repr__(self):
-#         return f'{self.name} ({self.quant})'
+            return self
+        
+    def __eq__(self,other):
+        return self.name == other.name and self.price == other.price and self.war == other.war
