@@ -26,7 +26,6 @@ def get_product_name(mes):
         get_product_name(mes)
     return name_of_pr
 
-
 def check_of_product():
     product = input('Какой товар хотите добавить, непрод или прод? ').lower()
     if product == "прод" or product == "непрод":
@@ -122,7 +121,7 @@ def main_menu():
             check_date()
         case 8:
             exit_from_warh()
-
+    
 
 def create_new_warh():
     global current_warehouse
@@ -131,8 +130,9 @@ def create_new_warh():
         create_new_warh()
         return
     initial_data = []
-    current_warehouse = Warehouse(name, initial_data)
-    warehouses.append(current_warehouse)
+    new_warehouse = Warehouse(name, initial_data)
+    warehouses.append(new_warehouse)
+    return new_warehouse
     
 
 def switch_warh():
@@ -144,8 +144,8 @@ def switch_warh():
         while True:
             answer = input("Хотите добавить склад или выйти? ").lower()
             if answer == 'добавить':
-                create_new_warh()
-                return
+                current_warehouse = create_new_warh()
+                return warehouses
             elif answer == "выйти":
                 return
             else:
