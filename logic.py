@@ -1,26 +1,8 @@
 from databaseclass import Database
 db = Database('Projectwarehouse.sqlite3')
+from newutils import *
 
 current_warehouse = None
-
-def get_float_value(mes):
-    try:
-        value = float(input(mes))
-        return value
-    except ValueError:
-        print('Неверное значение! Значение должно быть в формате числа')
-        return get_float_value(mes)
-
-def check_request():
-    try:
-        request = int(input('Что вы хотите сделать? '))
-        if request <= 0 or request > 9:
-            raise ValueError
-        return request
-    except ValueError:
-        print('Неверное значение! Нужно вводить цифры из списка')
-        return check_request()
-
 
 def main_menu():
     global current_warehouse
@@ -59,24 +41,24 @@ def main_menu():
                 print('Не удалось поменять склад')
         case 3:
             name_of_product = input("Введите название продукта: ")
-            amount = input("Сколько товара вы хотите заказать: ")
-            price = input("Какая цена товара: ")
-            type = input("прод или непрод^ ")
-            date = input("Какой срок годности формат(гггг-мм-дд): ")
+            amount = get_float_value("Сколько товара вы хотите заказать: ")
+            price = get_float_value("Какая цена товара: ")
+            type = chek_type_product("прод или непрод: ")
+            date = check_date("Какой срок годности формат(гггг-мм-дд): ")
             db.add_product(name_of_product, amount, price, type, date, current_warehouse)    
         case 4:
-            id = int(input('Введите id продукта: '))
-            amount = int(input('Введите количество, которое хотите купить: '))
+            id = get_float_value('Введите id продукта: ')
+            amount = get_float_value('Введите количество, которое хотите купить: ')
             db.delete_product(amount,id)
         case 5:  
             data = db.list_of_products(current_warehouse, 'price')
             print(*data)
         case 6:
-            info_id = int(input('Введите id для получения информации о продукте: '))
+            info_id = get_float_value('Введите id для получения информации о продукте: ')
             info = db.get_info_product(info_id)
             print(*info)
         case 7:
-            prod_id = int(input('Введите id продукта: '))
+            prod_id = get_float_value('Введите id продукта: ')
             check_guarantee = db.check_date_of_product(prod_id)
             print(check_guarantee, 'дней')
         case 8:

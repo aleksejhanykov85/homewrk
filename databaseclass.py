@@ -78,7 +78,7 @@ class Database():
             cur.execute('''insert into warehouses(
                         name)
                         values(?)
-                        ''',name)
+                        ''',[name])
             cur.execute('select id from warehouses where name = ?', [name])
             res = cur.fetchone()
             self.connection.commit()
